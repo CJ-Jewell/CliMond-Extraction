@@ -1,0 +1,57 @@
+# Download the ASCII files from https://www.climond.org/ClimateData.aspx
+
+setwd("~/path/CM10_1975H_Bio_ASCII_V1.2")
+
+install.packages("raster")
+install.packages("plyr")
+
+library(raster)
+library(plyr)
+
+
+#### To loop through all 40 variables
+latlong <- read.csv("~/path/CliMond/lat_long.csv")
+setwd("~/path/CliMond/CM10_1975H_Bio_ESRI_V1.2/CM10_1975H_Bio_V1.2")
+
+
+folders <- list.dirs(path="~/path/CliMond/CM10_1975H_Bio_ESRI_V1.2/CM10_1975H_Bio_V1.2", full.names = TRUE, recursive=FALSE)
+
+bio_df <- c()
+
+#Note: this will cause an error for the last "info" folder which does not have an .adf file
+for (currentfile in folders) {
+	path <- paste0(currentfile,"/w001001.adf")
+	bio <- raster(path)
+	bio_extracted <- extract(bio, latlong)
+	bio_df <- cbind(bio_df, bio_extracted)
+	colnames(bio_df)[colnames(bio_df)=="bio_extracted"] <- currentfile
+}
+
+for (currentfile in folders) {
+	print(currentfile)
+}
+
+bio_df <- data.frame(bio_df)
+
+write.csv(bio_df, file="CliMondExtracted.csv") 
+
+
+
+
+
+### To extract one at a time
+library(raster)
+
+setwd("~/path/CliMond/")
+
+bio1 <- raster("bio01/w001001.adf")
+plot(bio1)
+bio1_AnnMeanT <- extract(bio1, latlong)
+
+
+bio2 <- raster("bio02/w001001.adf")
+plot(bio2)
+bio2_MeanDiT <- extract(bio2, xy)
+
+x <- data.frame(bio1_AnnMeanT, test2)
+write.csv(x, file = "CliMondExtracted.csv")
